@@ -8,27 +8,20 @@ import seaborn as sns
 import urllib
 import sys
 
-try:
-    # For Python 3.0 and later
-    from urllib.request import urlopen
-except ImportError:
-    # Fall back to Python 2's urllib2
-    from urllib2 import urlopen
-
 CODESPEED_URL = 'http://localhost:8000/'
 
 def add(data):
     response = "None"
     try:
         encoded = urllib.parse.urlencode(data).encode('utf-8')
-        f = urlopen(CODESPEED_URL + 'result/add/json/', encoded)
+        f = urllib.request.urlopen(CODESPEED_URL + 'result/add/json/', encoded)
     except urllib.request.URLError as e:
         print(str(e))
         print(e.read())
         return
     response = f.read()
     f.close()
-    print("Server ({}) response: {}\n".format(CODESPEED_URL, response))
+    print("Server ({}) response: {}".format(CODESPEED_URL, response))
 
 names = ("timestamp" , "value" , "unit" , "criterion" , "benchmark" , "vm" , "suite" , "extra_args" , "warmup" , "cores" , "input_size" , "variable_values")
 types = (str         , float   , str    , str         , str         , str  , str     , str          , str      , int     , str          , str              )
