@@ -51,7 +51,6 @@ class Converter(object):
         pycket_sha, pypy_sha = fname_to_shas(fname)
 
         for (i, mean), (j, std) in zip(means.iterrows(), vars.iterrows()):
-            vm = mean.vm
             d = { 'commitid'     : pycket_sha
                 , 'project'      : 'Pycket'
                 , 'branch'       : 'default'
@@ -66,6 +65,7 @@ class Converter(object):
         if self.debug:
             for val in self.data:
                 print(val)
+            return
 
         add({'json': json.dumps(self.data)})
         self.data = []
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         debug = False
 
     converter = Converter(debug)
-    for fname in sys.argv[1:]:
+    for fname in args:
         converter.add_file(fname)
     converter.send()
 
