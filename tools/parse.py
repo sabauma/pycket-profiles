@@ -1,10 +1,7 @@
 
 import json
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 import pandas
-import seaborn as sns
 import urllib
 import sys
 
@@ -19,7 +16,7 @@ def add(data):
         print(str(e))
         print(e.read())
         return
-    response = f.read()
+    response = f.read().decode('utf-8')
     f.close()
     print("Server ({}) response: {}".format(CODESPEED_URL, response))
 
@@ -50,7 +47,7 @@ class Converter(object):
 
         pycket_sha, pypy_sha = fname_to_shas(fname)
 
-        for (i, mean), (j, std) in zip(means.iterrows(), vars.iterrows()):
+        for (_, mean), (_, std) in zip(means.iterrows(), vars.iterrows()):
             d = { 'commitid'     : pycket_sha
                 , 'project'      : 'Pycket'
                 , 'branch'       : 'default'
@@ -70,11 +67,9 @@ class Converter(object):
         add({'json': json.dumps(self.data)})
         self.data = []
 
-if __name__ == '__main__':
-    args = sys.argv[1:]
-    if not args:
-        sys.exit(0)
-
+def main(go, args):
+    if not go:
+        return
     if args[0] == "--debug":
         debug = True
         args = args[1:]
@@ -85,4 +80,7 @@ if __name__ == '__main__':
     for fname in args:
         converter.add_file(fname)
     converter.send()
+
+
+main(__name__ == '__main__', sys.argv[1:])
 
