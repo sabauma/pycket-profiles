@@ -45,12 +45,19 @@ class Converter(object):
         means = data.groupby(['benchmark', 'vm']).mean().reset_index()
         vars  = data.groupby(['benchmark', 'vm']).std().reset_index()
 
-        pycket_sha, pypy_sha = fname_to_shas(fname)
+        info = fname_to_shas(fname)
+        pycket_sha, pypy_sha, *info = info
+        if info:
+            branch, *info = info
+            if branch == 'master':
+                branch = 'default'
+        else:
+            branch = 'default'
 
         for (_, mean), (_, std) in zip(means.iterrows(), vars.iterrows()):
             d = { 'commitid'     : pycket_sha
                 , 'project'      : 'Pycket'
-                , 'branch'       : 'default'
+                , 'branch'       : branch
                 , 'executable'   : mean.vm
                 , 'benchmark'    : mean.benchmark
                 , 'environment'  : 'Cutter'
@@ -76,10 +83,27 @@ def main(go, args):
     else:
         debug = False
 
+    infile = None
+    try:
+        infile = open('finished', 'r')
+    except OSError:
+        already_added = set()
+    else:
+        already_added = set(f.strip() for f in infile.readlines())
+    finally:
+        if infile is not None:
+            infile.close()
+
     converter = Converter(debug)
     for fname in args:
-        converter.add_file(fname)
+        if fname not in already_added:
+            converter.add_file(fname)
     converter.send()
+
+    with open('finished', 'a') as outfile:
+        for fname in args:
+            if fname not in already_added:
+                print(fname, file=outfile)
 
 
 main(__name__ == '__main__', sys.argv[1:])
